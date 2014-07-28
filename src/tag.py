@@ -11,6 +11,18 @@ class Tag:
         yield '#%s ' % self.tag
         yield from _iterencode(self.data, _current_indent_level)
 
+    def __str__(self):
+        return '#%s %s' % (self.tag, str(self.data))
+
+    def __repr__(self):
+        return '<%s.%s object, tag="%s", data=%s>' % (
+            self.__module__,
+            self.__class__.__name__,
+            self.tag,
+            repr(self.data)
+        )
+
+
 
 _root = {}
 
