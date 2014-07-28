@@ -1,6 +1,6 @@
 """Python ESON implementation.
 
-Just a coppied python json module, version 2.0.9.
+Just a copied python json module, version 2.0.9.
 """
 
 __all__ = [
@@ -146,7 +146,8 @@ _default_decoder = ESONDecoder(object_hook=None, object_pairs_hook=None)
 
 
 def load(fp, cls=None, object_hook=None, parse_float=None,
-        parse_int=None, parse_constant=None, object_pairs_hook=None, **kw):
+        parse_int=None, parse_constant=None, object_pairs_hook=None, 
+        tag_handler = None, **kw):
     """Deserialize ``fp`` (a ``.read()``-supporting file-like object containing
     a ESON document) to a Python object.
 
@@ -163,6 +164,11 @@ def load(fp, cls=None, object_hook=None, parse_float=None,
     collections.OrderedDict will remember the order of insertion). If
     ``object_hook`` is also defined, the ``object_pairs_hook`` takes priority.
 
+    ``tag_handler``, if specified, it is used to handle tag instead of
+    classic handler. Handler is a function from (tag, data) to parsed
+    value. You can use eson.tag.ignore_handler, eson.tag.struct_handler or
+    eson.tag.make_standard_handler([default_handler])
+
     To use a custom ``ESONDecoder`` subclass, specify it with the ``cls``
     kwarg; otherwise ``ESONDecoder`` is used.
 
@@ -170,11 +176,13 @@ def load(fp, cls=None, object_hook=None, parse_float=None,
     return loads(fp.read(),
         cls=cls, object_hook=object_hook,
         parse_float=parse_float, parse_int=parse_int,
-        parse_constant=parse_constant, object_pairs_hook=object_pairs_hook, **kw)
+        parse_constant=parse_constant, object_pairs_hook=object_pairs_hook,
+        tag_handler = tag_handler, **kw)
 
 
 def loads(s, encoding=None, cls=None, object_hook=None, parse_float=None,
-        parse_int=None, parse_constant=None, object_pairs_hook=None, **kw):
+        parse_int=None, parse_constant=None, object_pairs_hook=None,
+        tag_handler = None, **kw):
     """Deserialize ``s`` (a ``str`` instance containing a ESON
     document) to a Python object.
 
@@ -206,6 +214,11 @@ def loads(s, encoding=None, cls=None, object_hook=None, parse_float=None,
     This can be used to raise an exception if invalid ESON numbers
     are encountered.
 
+    ``tag_handler``, if specified, it is used to handle tag instead of
+    classic handler. Handler is a function from (tag, data) to parsed
+    value. You can use eson.tag.ignore_handler, eson.tag.struct_handler or
+    eson.tag.make_standard_handler([default_handler])
+
     To use a custom ``ESONDecoder`` subclass, specify it with the ``cls``
     kwarg; otherwise ``ESONDecoder`` is used.
 
@@ -219,7 +232,8 @@ def loads(s, encoding=None, cls=None, object_hook=None, parse_float=None,
         raise ValueError("Unexpected UTF-8 BOM (decode using utf-8-sig)")
     if (cls is None and object_hook is None and
             parse_int is None and parse_float is None and
-            parse_constant is None and object_pairs_hook is None and not kw):
+            parse_constant is None and object_pairs_hook is None and
+            tag_handler is None and not kw):
         return _default_decoder.decode(s)
     if cls is None:
         cls = ESONDecoder
@@ -233,5 +247,7 @@ def loads(s, encoding=None, cls=None, object_hook=None, parse_float=None,
         kw['parse_int'] = parse_int
     if parse_constant is not None:
         kw['parse_constant'] = parse_constant
+    if tag_handler is not None:
+        kw['tag_handler'] = tag_handler
     return cls(**kw).decode(s)
 

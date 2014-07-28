@@ -48,3 +48,21 @@ def delete(path):
         act = act.get(t)
     if tokens[-1] in act:
         del act[tokens[-1]]
+
+
+def error_handler(tag, data):
+    raise KeyError("Tag %s not registered" % tag)
+
+def ignore_handler(tag, data):
+    return data
+
+def struct_handler(tag, data):
+    return Tag(tag, data)
+
+def make_standard_handler(default = error_handler):
+    def handler(tag, data):
+        f = resolve(tag) or default
+        return f(tag, data)
+    return handler
+
+

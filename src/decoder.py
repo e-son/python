@@ -4,6 +4,7 @@ Copied and slightly edited json.decoder
 """
 
 from .scanner import py_make_eson_scanner
+from .tag import make_standard_handler
 import re
 
 # C speedup not supporeted yet
@@ -292,7 +293,7 @@ class ESONDecoder(object):
 
     def __init__(self, object_hook=None, parse_float=None,
             parse_int=None, parse_constant=None, strict=True,
-            object_pairs_hook=None):
+            object_pairs_hook=None, tag_handler = None):
         """``object_hook``, if specified, will be called with the result
         of every ESON object decoded and its return value will be used in
         place of the given ``dict``.  This can be used to provide custom
@@ -327,6 +328,11 @@ class ESONDecoder(object):
         this context are those with character codes in the 0-31 range,
         including ``'\\t'`` (tab), ``'\\n'``, ``'\\r'`` and ``'\\0'``.
 
+        ``tag_handler``, if specified, it is used to handle tag instead of
+        classic handler. Handler is a function from (tag, data) to parsed
+        value. You can use eson.tag.ignore_handler, eson.tag.struct_handler or
+        eson.tag.make_standard_handler([default_handler])
+
         """
         self.object_hook = object_hook
         self.parse_float = parse_float or float
@@ -338,8 +344,8 @@ class ESONDecoder(object):
         self.parse_array = ESONArray
         self.parse_string = scanstring
         self.memo = {}
-        self.scan_once = py_make_eson_scanner(self)
-
+        self.tag_handler = tag_handler or make_standard_handler()
+        self.scan_once = py_make_eson_scanner(self)  
 
     def decode(self, s, _w=WHITESPACE.match):
         """Return the Python representation of ``s`` (a ``str`` instance
