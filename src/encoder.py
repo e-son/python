@@ -3,7 +3,7 @@
 
 import re
 
-from tag import Tag
+from .tag import Tag
 from json.encoder import *
 
 class ESONEncoder(JSONEncoder):

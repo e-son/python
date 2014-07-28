@@ -2,7 +2,7 @@
 """
 
 from json.decoder import JSONDecoder
-from scanner import py_make_eson_scanner
+from .scanner import py_make_eson_scanner
 
 
 __all__ = ['ESONDecoder']
