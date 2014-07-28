@@ -1,11 +1,15 @@
-"""Copied and edited json.scanner source
+""" ESON scanner implementation
+
+Copied and slightly edited json.scanner
 """
 
 import re
+from .tag import resolve
 
 def help_apply_tag(s, x):
     print("Applied %s on %s" % (s, repr(x)))
     return x
+
 
 NUMBER_RE = re.compile(
     r'(-?(?:0|[1-9]\d*))(\.\d+)?([eE][-+]?\d+)?',
