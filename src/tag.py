@@ -9,7 +9,8 @@ class Tag:
 
     def _self_iterencode(self, _current_indent_level, _iterencode):
         yield '#%s ' % self.tag
-        yield from _iterencode(self.data, _current_indent_level)
+        for chunk in _iterencode(self.data, _current_indent_level):
+            yield chunk
 
     def __str__(self):
         return '#%s %s' % (self.tag, str(self.data))

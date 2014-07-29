@@ -298,8 +298,9 @@ def _make_iterencode(markers, _default, _encoder, _indent, _floatstr,
                 yield buf + _encoder(value)
             elif isinstance(value, Tag):
                 yield buf
-                yield from value._self_iterencode(
-                    _current_indent_level, _iterencode)   
+                for chunk in value._self_iterencode(
+                        _current_indent_level, _iterencode):
+                    yield chunk
             elif value is None:
                 yield buf + 'null'
             elif value is True:
@@ -322,7 +323,8 @@ def _make_iterencode(markers, _default, _encoder, _indent, _floatstr,
                     chunks = _iterencode_dict(value, _current_indent_level)
                 else:
                     chunks = _iterencode(value, _current_indent_level)
-                yield from chunks
+                for chunk in chunks:
+                    yield chunk
         if newline_indent is not None:
             _current_indent_level -= 1
             yield '\n' + _indent * _current_indent_level
@@ -383,8 +385,9 @@ def _make_iterencode(markers, _default, _encoder, _indent, _floatstr,
             if isinstance(value, str):
                 yield _encoder(value)
             elif isinstance(value, Tag):
-                yield from value._self_iterencode(
-                    _current_indent_level, _iterencode)
+                for chunk in value._self_iterencode(
+                        _current_indent_level, _iterencode):
+                    yield chunk
             elif value is None:
                 yield 'null'
             elif value is True:
@@ -404,7 +407,8 @@ def _make_iterencode(markers, _default, _encoder, _indent, _floatstr,
                     chunks = _iterencode_dict(value, _current_indent_level)
                 else:
                     chunks = _iterencode(value, _current_indent_level)
-                yield from chunks
+                for chnuk in chunks:
+                    yield chunk
         if newline_indent is not None:
             _current_indent_level -= 1
             yield '\n' + _indent * _current_indent_level
@@ -416,7 +420,8 @@ def _make_iterencode(markers, _default, _encoder, _indent, _floatstr,
         if isinstance(o, str):
             yield _encoder(o)
         elif isinstance(o, Tag):
-            yield from o._self_iterencode(_current_indent_level, _iterencode)
+            for chunk in o._self_iterencode(_current_indent_level, _iterencode):
+                yield chunk
         elif o is None:
             yield 'null'
         elif o is True:
@@ -430,9 +435,11 @@ def _make_iterencode(markers, _default, _encoder, _indent, _floatstr,
             # see comment for int/float in _make_iterencode
             yield _floatstr(float(o))
         elif isinstance(o, (list, tuple)):
-            yield from _iterencode_list(o, _current_indent_level)
+            for chunk in _iterencode_list(o, _current_indent_level):
+                yield chunk
         elif isinstance(o, dict):
-            yield from _iterencode_dict(o, _current_indent_level)
+            for chunk in _iterencode_dict(o, _current_indent_level):
+                yield chunk
         else:
             if markers is not None:
                 markerid = id(o)
@@ -440,7 +447,8 @@ def _make_iterencode(markers, _default, _encoder, _indent, _floatstr,
                     raise ValueError("Circular reference detected")
                 markers[markerid] = o
             o = _default(o)
-            yield from _iterencode(o, _current_indent_level)
+            for chunk in _iterencode(o, _current_indent_level):
+                yield chunk
             if markers is not None:
                 del markers[markerid]
     return _iterencode

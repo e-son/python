@@ -195,7 +195,7 @@ def ESONObject(s_and_end, strict, scan_once, object_hook, object_pairs_hook,
         try:
             value, end = scan_once(s, end)
         except StopIteration as err:
-            raise ValueError(errmsg("Expecting value", s, err.value)) from None
+            raise ValueError(errmsg("Expecting value", s, err.value)) #from None
         pairs_append((key, value))
         try:
             nextchar = s[end]
@@ -239,7 +239,7 @@ def ESONArray(s_and_end, scan_once, _w=WHITESPACE.match, _ws=WHITESPACE_STR):
         try:
             value, end = scan_once(s, end)
         except StopIteration as err:
-            raise ValueError(errmsg("Expecting value", s, err.value)) from None
+            raise ValueError(errmsg("Expecting value", s, err.value)) #from None
         _append(value)
         nextchar = s[end:end + 1]
         if nextchar in _ws:
@@ -370,5 +370,5 @@ class ESONDecoder(object):
         try:
             obj, end = self.scan_once(s, idx)
         except StopIteration as err:
-            raise ValueError(errmsg("Expecting value", s, err.value)) from None
+            raise ValueError(errmsg("Expecting value", s, err.value)) #from None
         return obj, end
