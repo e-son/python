@@ -58,7 +58,7 @@ def delete(path):
         if act == None:
             return
         act = act.get(t)
-    if tokens[-1] in act:
+    if act and tokens[-1] in act:
         del act[tokens[-1]]
 
 
