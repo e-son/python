@@ -5,13 +5,16 @@ Provides:
 # Tag representation. #
 Used for encoding tags from or, optionally, decoding tags to.
 
+# Tag startegies #
+Tag startegy is a fuction, which takes tags identifier and decoded data turns
+it into represented object. Several strategies are provided in this module.
 
 # Tag registration tools. #
-To decode tag, you need have registered it with
-handler function which transforms decoded data to final object.
-Tags can be organized in namespace tree. Tag identifiers are paths in this tree
-using slash ( '/' ) as a separator. Namespace is represented by dict object
-where values can be other namespaces or handlers.
+In standart strategy, handler has to be registred to decode tag.
+Handler is a strategy without tag argument - tag is specified during
+registration. Handlers can be organized in namespace tree. Namespace is
+represented as a dictionary of other namespaces or handlers.
+Tag identifiers are paths in the tree. Slash ( '/' ) is the separator. 
 """
 
 
@@ -20,7 +23,7 @@ class Tag:
     """
 
     def __init__(self, tag, data):
-        """ Constructs new Tag object using tag string and data object.
+        """ Constructs new Tag object using tag identifier and data object.
         """
         self.data = data
         self.tag = tag
@@ -56,7 +59,7 @@ def resolve(path):
 
 
 def register(path, o):
-    """ Registers object to given path.
+    """ Registers namespace or handler to given path.
     Parent namespace have to exist but path itself not.
     """
     tokens = path.split('/')
@@ -85,21 +88,30 @@ def delete(path):
         del act[tokens[-1]]
 
 
-def error_handler(tag, data):
+def error_strategy(tag, data):
+    """ Tag strategy that just throws error
+    """
     raise KeyError("Tag %s not registered" % tag)
 
-def ignore_handler(tag, data):
+def ignore_strategy(tag, data):
+    """ Tag strategy that ignores tag
+    """
     return data
 
-def struct_handler(tag, data):
+def struct_strategy(tag, data):
+    """ Tag strategy decodes tag into Tag object
+    """
     return Tag(tag, data)
 
-def make_standard_handler(default = error_handler):
-    def handler(tag, data):
+def make_standard_strategy(default_strategy = error_strategy):
+    """ Creates tag strategy which tries to find handler in registered tags.
+    If default_strategy is specified it is used when tag is not registered.
+    """
+    def strategy(tag, data):
         f = resolve(tag)
         if not hasattr(f, '__call__'):
-            return default(tag, data)
+            return default_strategy(tag, data)
         return f(data)
-    return handler
+    return strategy
 
 

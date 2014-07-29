@@ -17,7 +17,7 @@ def py_make_eson_scanner(context):
     parse_string = context.parse_string
     match_number = NUMBER_RE.match
     match_tag = TAG_RE.match
-    apply_tag = context.tag_handler
+    apply_tag = context.tag_strategy
     strict = context.strict
     parse_float = context.parse_float
     parse_int = context.parse_int

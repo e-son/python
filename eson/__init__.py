@@ -92,14 +92,14 @@ Specializing tag decoding::
 
     >>> import eson
     >>> import eson.tag
-    >>> eson.loads("#foo [4, #poo 5]", tag_handler = eson.tag.ignore_handler)
+    >>> eson.loads("#foo [4, #poo 5]", tag_strategy = eson.tag.ignore_strategy)
     [4, 5]
-    >>> eson.loads("#foo 42", tag_handler = eson.tag.struct_handler)
+    >>> eson.loads("#foo 42", tag_strategy = eson.tag.struct_strategy)
     <eson.tag.Tag object, tag="foo", data=42>
-    >>> def my_handler(tag, data):
+    >>> def my_strategy(tag, data):
     ...     return (tag, data)
     ... 
-    >>> eson.loads("#foo 42", tag_handler = my_handler)
+    >>> eson.loads("#foo 42", tag_strategy = my_strategy)
     ('foo', 42)
 
 Specializing ESON object encoding::
@@ -262,7 +262,7 @@ _default_decoder = ESONDecoder(object_hook=None, object_pairs_hook=None)
 
 def load(fp, cls=None, object_hook=None, parse_float=None,
         parse_int=None, parse_constant=None, object_pairs_hook=None, 
-        tag_handler = None, **kw):
+        tag_strategy = None, **kw):
     """Deserialize ``fp`` (a ``.read()``-supporting file-like object containing
     a ESON document) to a Python object.
 
@@ -279,10 +279,9 @@ def load(fp, cls=None, object_hook=None, parse_float=None,
     collections.OrderedDict will remember the order of insertion). If
     ``object_hook`` is also defined, the ``object_pairs_hook`` takes priority.
 
-    ``tag_handler``, if specified, it is used to handle tag instead of
-    classic handler. Handler is a function from (tag, data) to parsed
-    value. You can use eson.tag.ignore_handler, eson.tag.struct_handler or
-    eson.tag.make_standard_handler([default_handler])
+    ``tag_strategy``, if specified, it is used to handle tag instead of
+    classic strategy. Strategy is a function from (tag, data) to parsed
+    value. See eson.tag module for some default strategies.
 
     To use a custom ``ESONDecoder`` subclass, specify it with the ``cls``
     kwarg; otherwise ``ESONDecoder`` is used.
@@ -292,12 +291,12 @@ def load(fp, cls=None, object_hook=None, parse_float=None,
         cls=cls, object_hook=object_hook,
         parse_float=parse_float, parse_int=parse_int,
         parse_constant=parse_constant, object_pairs_hook=object_pairs_hook,
-        tag_handler = tag_handler, **kw)
+        tag_strategy = tag_strategy, **kw)
 
 
 def loads(s, encoding=None, cls=None, object_hook=None, parse_float=None,
         parse_int=None, parse_constant=None, object_pairs_hook=None,
-        tag_handler = None, **kw):
+        tag_strategy = None, **kw):
     """Deserialize ``s`` (a ``str`` instance containing a ESON
     document) to a Python object.
 
@@ -329,10 +328,9 @@ def loads(s, encoding=None, cls=None, object_hook=None, parse_float=None,
     This can be used to raise an exception if invalid ESON numbers
     are encountered.
 
-    ``tag_handler``, if specified, it is used to handle tag instead of
-    classic handler. Handler is a function from (tag, data) to parsed
-    value. You can use eson.tag.ignore_handler, eson.tag.struct_handler or
-    eson.tag.make_standard_handler([default_handler])
+    ``tag_strategy``, if specified, it is used to handle tag instead of
+    classic strategy. Strategy is a function from (tag, data) to parsed
+    value. See eson.tag module for some default strategies.
 
     To use a custom ``ESONDecoder`` subclass, specify it with the ``cls``
     kwarg; otherwise ``ESONDecoder`` is used.
@@ -348,7 +346,7 @@ def loads(s, encoding=None, cls=None, object_hook=None, parse_float=None,
     if (cls is None and object_hook is None and
             parse_int is None and parse_float is None and
             parse_constant is None and object_pairs_hook is None and
-            tag_handler is None and not kw):
+            tag_strategy is None and not kw):
         return _default_decoder.decode(s)
     if cls is None:
         cls = ESONDecoder
@@ -362,7 +360,7 @@ def loads(s, encoding=None, cls=None, object_hook=None, parse_float=None,
         kw['parse_int'] = parse_int
     if parse_constant is not None:
         kw['parse_constant'] = parse_constant
-    if tag_handler is not None:
-        kw['tag_handler'] = tag_handler
+    if tag_strategy is not None:
+        kw['tag_strategy'] = tag_strategy
     return cls(**kw).decode(s)
 
