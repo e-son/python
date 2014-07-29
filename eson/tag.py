@@ -69,8 +69,10 @@ def struct_handler(tag, data):
 
 def make_standard_handler(default = error_handler):
     def handler(tag, data):
-        f = resolve(tag) or default
-        return f(tag, data)
+        f = resolve(tag)
+        if not hasattr(f, '__call__'):
+            return default(tag, data)
+        return f(data)
     return handler
 
 

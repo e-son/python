@@ -64,14 +64,14 @@ Decoding tags::
 
     >>> import eson
     >>> import eson.tag
-    >>> def notify_handler(tag, data):
+    >>> def to_tuple(data):
     ...     print("Called handler on " + str(data))
-    ...     return data
+    ...     return tuple(data)
     ... 
-    >>> eson.tag.register("notify",notify_handler)
-    >>> eson.loads('#notify [true, "two", 3]')
+    >>> eson.tag.register("tuple",to_tuple)
+    >>> eson.loads('#tuple [true, "two", 3]')
     Called handler on [True, 'two', 3]
-    [True, 'two', 3]
+    (True, 'two', 3)
 
 Specializing ESON object decoding::
 
