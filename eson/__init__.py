@@ -1,6 +1,121 @@
-"""Python ESON implementation.
+r"""Python ESON <https://github.com/e-son/ESON> implementation.
 
-Just a copied python json module, version 2.0.9.
+:mod:`eson` is an edited copy of standard python module :mod:`json`.
+Therefore, it coppies :mod:`json`'s API, which is similar to :mod:`pickle`.
+
+Encoding basic Python object hierarchies::
+
+    >>> import eson
+    >>> eson.dumps(['foo', {'bar': ('baz', None, 1.0, 2)}])
+    '["foo", {"bar": ["baz", null, 1.0, 2]}]'
+    >>> print eson.dumps("\"foo\bar")
+    "\"foo\bar"
+    >>> print eson.dumps(u'\u1234')
+    "\u1234"
+    >>> print eson.dumps('\\')
+    "\\"
+    >>> print eson.dumps({"c": 0, "b": 0, "a": 0}, sort_keys=True)
+    {"a": 0, "b": 0, "c": 0}
+    >>> from StringIO import StringIO
+    >>> io = StringIO()
+    >>> eson.dump(['streaming API'], io)
+    >>> io.getvalue()
+    '["streaming API"]'
+
+Encoding tags::
+
+    >>> import eson
+    >>> from eson.tag import Tag
+    >>> eson.dumps(Tag("hello","world"))
+    '#hello "world"'
+    >>> eson.dumps([ Tag("foo",[4, 2]), Tag("out",Tag("in",42))])
+    '[#foo [4, 2], #out #in 42]'
+
+Compact encoding::
+
+    >>> import eson
+    >>> eson.dumps([1,2,3,{'4': 5, '6': 7}], sort_keys=True, separators=(',',':'))
+    '[1,2,3,{"4":5,"6":7}]'
+
+Pretty printing::
+
+    >>> import eson
+    >>> print eson.dumps({'4': 5, '6': 7}, sort_keys=True,
+    ...                  indent=4, separators=(',', ': '))
+    {
+        "4": 5,
+        "6": 7
+    }
+
+Decoding JSON::
+
+    >>> import eson
+    >>> obj = [u'foo', {u'bar': [u'baz', None, 1.0, 2]}]
+    >>> eson.loads('["foo", {"bar":["baz", null, 1.0, 2]}]') == obj
+    True
+    >>> eson.loads('"\\"foo\\bar"') == u'"foo\x08ar'
+    True
+    >>> from StringIO import StringIO
+    >>> io = StringIO('["streaming API"]')
+    >>> eson.load(io)[0] == 'streaming API'
+    True
+
+Decoding tags::
+
+    >>> import eson
+    >>> import eson.tag
+    >>> def notify_handler(tag, data):
+    ...     print("Called handler on " + str(data))
+    ...     return data
+    ... 
+    >>> eson.tag.register("notify",notify_handler)
+    >>> eson.loads('#notify [true, "two", 3]')
+    Called handler on [True, 'two', 3]
+    [True, 'two', 3]
+
+Specializing ESON object decoding::
+
+    >>> import eson
+    >>> def as_complex(dct):
+    ...     if '__complex__' in dct:
+    ...         return complex(dct['real'], dct['imag'])
+    ...     return dct
+    ...
+    >>> eson.loads('{"__complex__": true, "real": 1, "imag": 2}',
+    ...     object_hook=as_complex)
+    (1+2j)
+    >>> from decimal import Decimal
+    >>> eson.loads('1.1', parse_float=Decimal) == Decimal('1.1')
+    True
+
+Specializing tag decoding::
+
+    >>> import eson
+    >>> import eson.tag
+    >>> eson.loads("#foo [4, #poo 5]", tag_handler = eson.tag.ignore_handler)
+    [4, 5]
+    >>> eson.loads("#foo 42", tag_handler = eson.tag.struct_handler)
+    <eson.tag.Tag object, tag="foo", data=42>
+    >>> def my_handler(tag, data):
+    ...     return (tag, data)
+    ... 
+    >>> eson.loads("#foo 42", tag_handler = my_handler)
+    ('foo', 42)
+
+Specializing ESON object encoding::
+
+    >>> import eson
+    >>> from eson.tag import Tag
+    >>> def object_encode(o):         
+    ...     return Tag(o.__class__.__name__, o.__dict__)
+    ... 
+    >>> class Foo:
+    ...     def __init__(self, data):
+    ...         self.data = data
+    ... 
+    >>> eson.dumps(Foo(42),default=object_encode)
+    '#Foo {"data": 42}'
+
 """
 
 __all__ = [
