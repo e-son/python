@@ -1,5 +1,5 @@
 import unittest
-from src import tag
+from eson import tag
 
 
 def f(x):
