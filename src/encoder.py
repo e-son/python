@@ -297,9 +297,8 @@ def _make_iterencode(markers, _default, _encoder, _indent, _floatstr,
             if isinstance(value, str):
                 yield buf + _encoder(value)
             elif isinstance(value, Tag):
-                yield buf
-                for chunk in value._self_iterencode(
-                        _current_indent_level, _iterencode):
+                yield '%s#%s ' % (buf, value.tag)
+                for chunk in _iterencode(value.data, _current_indent_level):
                     yield chunk
             elif value is None:
                 yield buf + 'null'
@@ -385,8 +384,8 @@ def _make_iterencode(markers, _default, _encoder, _indent, _floatstr,
             if isinstance(value, str):
                 yield _encoder(value)
             elif isinstance(value, Tag):
-                for chunk in value._self_iterencode(
-                        _current_indent_level, _iterencode):
+                yield '#%s ' % value.tag
+                for chunk in _iterencode(value.data, _current_indent_level):
                     yield chunk
             elif value is None:
                 yield 'null'
@@ -420,7 +419,8 @@ def _make_iterencode(markers, _default, _encoder, _indent, _floatstr,
         if isinstance(o, str):
             yield _encoder(o)
         elif isinstance(o, Tag):
-            for chunk in o._self_iterencode(_current_indent_level, _iterencode):
+            yield '#%s ' % o.tag
+            for chunk in _iterencode(o.data, _current_indent_level):
                 yield chunk
         elif o is None:
             yield 'null'
