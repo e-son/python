@@ -406,7 +406,7 @@ def _make_iterencode(markers, _default, _encoder, _indent, _floatstr,
                     chunks = _iterencode_dict(value, _current_indent_level)
                 else:
                     chunks = _iterencode(value, _current_indent_level)
-                for chnuk in chunks:
+                for chunk in chunks:
                     yield chunk
         if newline_indent is not None:
             _current_indent_level -= 1
