@@ -16,7 +16,7 @@ Encoding basic Python object hierarchies::
     "\\"
     >>> print eson.dumps({"c": 0, "b": 0, "a": 0}, sort_keys=True)
     {"a": 0, "b": 0, "c": 0}
-    >>> from StringIO import StringIO
+    >>> from io import StringIO
     >>> io = StringIO()
     >>> eson.dump(['streaming API'], io)
     >>> io.getvalue()
@@ -55,7 +55,7 @@ Decoding JSON::
     True
     >>> eson.loads('"\\"foo\\bar"') == u'"foo\x08ar'
     True
-    >>> from StringIO import StringIO
+    >>> from io import StringIO
     >>> io = StringIO('["streaming API"]')
     >>> eson.load(io)[0] == 'streaming API'
     True
@@ -129,6 +129,9 @@ __all__ = [
 
 from .decoder import ESONDecoder
 from .encoder import ESONEncoder
+
+### Must be imported to register core tags ###
+from . import core
 
 _default_encoder = ESONEncoder(
     skipkeys=False,
