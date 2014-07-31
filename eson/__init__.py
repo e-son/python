@@ -115,6 +115,10 @@ Specializing ESON object encoding::
     ... 
     >>> eson.dumps(Foo(42),default=object_encode)
     '#Foo {"data": 42}'
+    >>> foo = Foo(47)
+    >>> foo.toESON = lambda self: Tag("foo", self.data)
+    >>> eson.dumps(foo)
+    '#foo 47'
 
 """
 

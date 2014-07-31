@@ -73,6 +73,12 @@ def py_encode_basestring_ascii(s):
 encode_basestring_ascii = (
     c_encode_basestring_ascii or py_encode_basestring_ascii)
 
+# Used for built-in classes instead of toESON(), since it
+# is not possible to expand then (written in native code)
+_ESONable_classes = {
+    # At least datetime should appear
+}
+
 class ESONEncoder(object):
     """Extensible ESON encoder for Python data structures.
 
@@ -163,7 +169,7 @@ class ESONEncoder(object):
     def default(self, o):
         """Implement this method in a subclass such that it returns
         a serializable object for ``o``, or calls the base implementation
-        (to raise a ``TypeError``).
+        (to follow the standard behavior).
 
         For example, to support arbitrary iterators, you could
         implement default like this::
@@ -446,7 +452,14 @@ def _make_iterencode(markers, _default, _encoder, _indent, _floatstr,
                 if markerid in markers:
                     raise ValueError("Circular reference detected")
                 markers[markerid] = o
-            o = _default(o)
+            # objects with "toESON()" are supported
+            if hasattr(o, "toESON") and hasattr(o.toESON, "__call__"):
+                o = o.toESON()
+            # so far internal way to customize built-in class serialization
+            elif o.__class__ in _ESONable_classes:
+                o = _ESONable_classes[o.__class__](o)
+            else:
+                o = _default(o)
             for chunk in _iterencode(o, _current_indent_level):
                 yield chunk
             if markers is not None:
